@@ -13,7 +13,7 @@ Packages:
 - `server` runs Go handlers: workers, retries, and the background processes of a .NET `BackgroundJobServer`.
 - `hangfiretest` is a fake client for unit tests.
 
-The requirements live in [docs/golang-sdk-srs.md](docs/golang-sdk-srs.md).
+The requirements live in [docs/SRS/golang-sdk-srs.md](docs/SRS/golang-sdk-srs.md).
 
 ## Install
 
