@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 // JobContext describes the running job (SRS FR-W07). Handlers get it with FromContext.

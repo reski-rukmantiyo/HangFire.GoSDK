@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // SchemaVersion is the only Hangfire.SqlServer schema version this package writes to (SRS CR-01).

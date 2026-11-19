@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 // errAborted cancels a handler whose job left Processing for its worker.

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 func TestBatchRenamesParametersOnly(t *testing.T) {

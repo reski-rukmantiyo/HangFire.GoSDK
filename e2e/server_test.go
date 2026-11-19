@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/internal/sqltest"
-	"hangfire-gosdk/server"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/internal/sqltest"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/server"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 const goJobs = "E2E.Jobs.IGoJobs, E2E"

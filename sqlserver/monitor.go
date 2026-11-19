@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // Monitor is the read side of IMonitoringApi, with the queries of SqlServerMonitoringApi.cs.

@@ -18,7 +18,7 @@ The requirements live in [docs/SRS/golang-sdk-srs.md](docs/SRS/golang-sdk-srs.md
 ## Install
 
 ```sh
-go get hangfire-gosdk
+go get github.com/reski-rukmantiyo/HangFire.GoSDK@latest
 ```
 
 Import a SQL Server driver as well, for example `github.com/microsoft/go-mssqldb`. The SDK never installs or migrates the schema. The .NET side owns it.

@@ -17,8 +17,8 @@ import (
 
 	_ "github.com/microsoft/go-mssqldb"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 func main() {

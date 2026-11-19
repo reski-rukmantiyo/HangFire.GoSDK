@@ -12,7 +12,7 @@ package signup
 import (
 	"context"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 type Service struct {
@@ -43,8 +43,8 @@ import (
 	"context"
 	"testing"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/hangfiretest"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfiretest"
 )
 
 func TestRegisterEnqueuesWelcomeEmail(t *testing.T) {

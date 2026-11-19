@@ -22,8 +22,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 // Options configures a Server. Zero values take the .NET defaults (SRS Appendix A).

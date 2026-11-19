@@ -7,7 +7,7 @@ A console program can be a dedicated Hangfire worker. `Run(ctx)` starts the serv
 Add the SDK and a SQL Server driver to your module:
 
 ```sh
-go get hangfire-gosdk github.com/microsoft/go-mssqldb
+go get github.com/reski-rukmantiyo/HangFire.GoSDK@latest github.com/microsoft/go-mssqldb
 ```
 
 The SDK does not install the Hangfire schema. Install it from the .NET side before you start the worker.
@@ -28,9 +28,9 @@ import (
 
 	_ "github.com/microsoft/go-mssqldb"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/server"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/server"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 func main() {

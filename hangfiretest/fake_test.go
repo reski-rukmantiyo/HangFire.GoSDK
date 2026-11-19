@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/hangfiretest"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfiretest"
 )
 
 func TestFakeClientRecordsCalls(t *testing.T) {

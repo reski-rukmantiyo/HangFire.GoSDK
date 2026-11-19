@@ -12,7 +12,7 @@ import (
 
 	mssql "github.com/microsoft/go-mssqldb"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 type mssqlReturnStatus = mssql.ReturnStatus

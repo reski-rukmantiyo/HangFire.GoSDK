@@ -1,2 +1,6 @@
-
-examples/dotnet-dashboard/bin/
+bin/
+obj/
+.doccheck/
+.batchcheck/
+*.test
+.DS_Store

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // FetchedJob is a JobQueue row claimed by the sliding-invisibility fetch (SRS DR-16).

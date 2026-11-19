@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -79,12 +80,52 @@ func New(t testing.TB) *DB {
 	return d
 }
 
+var (
+	buildOnce sync.Once
+	buildErr  error
+)
+
+// buildHarness compiles the .NET harness once per process. `go test ./...`
+// runs packages as parallel processes, and concurrent `dotnet build`s of one
+// project fail on locked obj/ files, so builds are serialized with a lock file.
+func buildHarness(repoRoot string) error {
+	buildOnce.Do(func() {
+		lock := filepath.Join(os.TempDir(), "hangfire-gosdk-e2e-dotnet.lock")
+		deadline := time.Now().Add(5 * time.Minute)
+		for {
+			f, err := os.OpenFile(lock, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
+			if err == nil {
+				f.Close()
+				break
+			}
+			if info, statErr := os.Stat(lock); statErr == nil && time.Since(info.ModTime()) > 5*time.Minute {
+				os.Remove(lock)
+				continue
+			}
+			if time.Now().After(deadline) {
+				buildErr = fmt.Errorf("waiting for %s: %w", lock, err)
+				return
+			}
+			time.Sleep(200 * time.Millisecond)
+		}
+		defer os.Remove(lock)
+		cmd := exec.Command("dotnet", "build", "-nologo", "-v", "q", filepath.Join(repoRoot, "tools", "e2e-dotnet"))
+		if out, err := cmd.CombinedOutput(); err != nil {
+			buildErr = fmt.Errorf("building tools/e2e-dotnet: %v\n%s", err, out)
+		}
+	})
+	return buildErr
+}
+
 // Create makes a fresh database next to the one base names and installs the
 // schema with the .NET harness. drop closes and deletes it.
 func Create(base, repoRoot string) (d *DB, drop func() error, err error) {
 	name := fmt.Sprintf("HfGo_%d_%04d", time.Now().Unix(), rand.IntN(10000))
 	conn := withDatabase(base, name)
-	cmd := exec.Command("dotnet", "run", "--project", filepath.Join(repoRoot, "tools", "e2e-dotnet"), "--", "install")
+	if err := buildHarness(repoRoot); err != nil {
+		return nil, nil, err
+	}
+	cmd := exec.Command("dotnet", "run", "--no-build", "--project", filepath.Join(repoRoot, "tools", "e2e-dotnet"), "--", "install")
 	cmd.Env = append(os.Environ(), "HANGFIRE_SQL="+conn)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return nil, nil, fmt.Errorf("installing schema into %s: %v\n%s", name, err, out)

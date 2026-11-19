@@ -18,9 +18,9 @@ import (
 	"testing"
 	"time"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/internal/sqltest"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/internal/sqltest"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 func setup(t *testing.T) (*sqltest.DB, *sqlserver.Storage) {

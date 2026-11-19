@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // AttemptsExceeded mirrors AttemptsExceededAction.

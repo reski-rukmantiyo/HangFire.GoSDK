@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // jobRef is what state rules need to know about a job: its id and the

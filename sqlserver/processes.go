@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // Background-process passes. Each takes the same distributed lock as its

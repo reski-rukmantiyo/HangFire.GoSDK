@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // RecurringManager is the SQL Server implementation of hangfire.RecurringManager,

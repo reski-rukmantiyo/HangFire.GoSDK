@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 func TestRetryElection(t *testing.T) {

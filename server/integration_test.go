@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"hangfire-gosdk/hangfire"
-	"hangfire-gosdk/internal/sqltest"
-	"hangfire-gosdk/server"
-	"hangfire-gosdk/sqlserver"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/internal/sqltest"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/server"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/sqlserver"
 )
 
 // These tests need a SQL Server: set HANGFIRE_SQL (see internal/sqltest).
@@ -122,7 +122,7 @@ func checkNoLeaks(t *testing.T) {
 		stacks := string(buf[:runtime.Stack(buf, true)])
 		var leaked []string
 		for _, g := range strings.Split(stacks, "\n\n") {
-			if strings.Contains(g, "hangfire-gosdk/server.") && !strings.Contains(g, "_test.go") {
+			if strings.Contains(g, "github.com/reski-rukmantiyo/HangFire.GoSDK/server.") && !strings.Contains(g, "_test.go") {
 				leaked = append(leaked, g)
 			}
 		}

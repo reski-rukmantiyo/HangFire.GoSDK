@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // JobData is a job row with its parameters, as IStorageConnection.GetJobData returns it.

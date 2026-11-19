@@ -1,4 +1,4 @@
-module hangfire-gosdk
+module github.com/reski-rukmantiyo/HangFire.GoSDK
 
 go 1.26.4
 

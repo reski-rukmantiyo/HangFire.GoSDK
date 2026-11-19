@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"hangfire-gosdk/hangfire"
+	"github.com/reski-rukmantiyo/HangFire.GoSDK/hangfire"
 )
 
 // Client is the SQL Server implementation of hangfire.Client.
