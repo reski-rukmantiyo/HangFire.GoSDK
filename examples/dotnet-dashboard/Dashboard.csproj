@@ -11,6 +11,7 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.25" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.25" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
     <!-- Contract assembly "E2E" that holds E2E.Jobs.IGoJobs, so the Dashboard can render Go-created jobs. -->

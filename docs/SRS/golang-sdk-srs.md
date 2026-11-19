@@ -100,7 +100,7 @@ Scheduled   Enqueued ◄──── Awaiting (parent finished)
 
 ### 2.3 Operating environment
 
-- Go 1.22 or later, using `database/sql` with `github.com/microsoft/go-mssqldb`.
+- Go 1.26.11 or later (the patched standard library), using `database/sql` with `github.com/microsoft/go-mssqldb`.
 - SQL Server 2012 or later, or Azure SQL. A .NET Hangfire process has already installed the schema at version 9.
 - Linux, macOS, and Windows.
 

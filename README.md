@@ -23,6 +23,8 @@ go get github.com/reski-rukmantiyo/HangFire.GoSDK@latest
 
 Import a SQL Server driver as well, for example `github.com/microsoft/go-mssqldb`. The SDK never installs or migrates the schema. The .NET side owns it.
 
+The SDK requires Go 1.26.11 or later, the first release with fixes for every standard-library vulnerability the SDK reaches (TLS to SQL Server, URL parsing, ASN.1). With the default `GOTOOLCHAIN=auto`, an older `go` command downloads Go 1.26.11 for you.
+
 ## Enqueue a job for a .NET server
 
 ```go
