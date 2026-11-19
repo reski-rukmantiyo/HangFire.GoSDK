@@ -23,7 +23,10 @@ The limit is local to the `*server.Server` in this process. It is not shared:
 
 A value of zero or less means no limit.
 
-A job that waits for a slot keeps its worker busy. The worker has already fetched the job, and it holds the job's queue row until a slot frees. If a queue fills with jobs of a capped handler, they can occupy every worker while only `n` of them run. Jobs from other queues then wait too. To avoid that, put the capped jobs in their own queue on their own server, or use the worker count of that server as the cap:
+A job that waits for a slot keeps its worker busy. The worker already fetched the job, and it holds the job's queue row until a slot frees. If a queue fills with jobs of a capped handler, they can occupy every worker while only `n` of them run. Jobs from other queues then wait too. To avoid that, do one of these:
+
+- Put the capped jobs in their own queue on their own server.
+- Use the worker count of that server as the cap.
 
 ```go
 reports, err := server.New(storage, server.Options{
@@ -36,7 +39,7 @@ if err != nil {
 reports.Handle("MyApp.Jobs.ReportJob, MyApp", "Build", server.Handler1(buildReport))
 ```
 
-A waiting job stays in the `Enqueued` state. If the server shuts down, the job goes back to its queue.
+A waiting job stays in the `Enqueued` state. If the server stops, the job goes back to its queue.
 
 ## Limit a resource across the fleet
 
@@ -57,7 +60,7 @@ srv.Handle("MyApp.Jobs.ReportJob, MyApp", "Build",
 	}))
 ```
 
-The lock name gets the schema prefix, so the lock above is `HangFire:myapp:report:<tenant>`. If another job holds the lock for longer than the timeout, `Lock` returns an error that wraps `hangfire.ErrLockTimeout`. The job then fails and goes through the retry policy, so each wait costs a retry attempt. The connection stays open for as long as the handler runs.
+The SDK adds the schema prefix to the lock name, so the lock above is `HangFire:myapp:report:<tenant>`. If another job holds the lock for longer than the timeout, `Lock` returns an error that wraps `hangfire.ErrLockTimeout`. The job then fails and goes through the retry policy, so each wait costs a retry attempt. The connection stays open for as long as the handler runs.
 
 This is a mutex for Go handlers only. .NET jobs do not take the same lock unless your .NET code takes it too.
 

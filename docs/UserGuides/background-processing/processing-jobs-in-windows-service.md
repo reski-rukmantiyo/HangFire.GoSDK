@@ -10,7 +10,7 @@ Add the Windows service package to your module:
 go get golang.org/x/sys/windows/svc
 ```
 
-The service manager talks to the program through `svc.Handler`. The program below maps the stop request to a context cancel. `Run` then shuts the server down gracefully. When the program runs from a console instead of the service manager, it stops on Ctrl+C.
+The service manager talks to the program through `svc.Handler`. The program below maps the stop request to a context cancel. `Run` then stops the server gracefully. When the program runs from a console instead of the service manager, it stops on Ctrl+C.
 
 ```go
 //go:build windows
@@ -104,7 +104,7 @@ func main() {
 }
 ```
 
-`WaitHint` tells the service manager how long the stop may take, in milliseconds. Keep it above `ShutdownTimeout` (15 s), so the manager does not give up while jobs are being requeued.
+`WaitHint` tells the service manager how long the stop may take, in milliseconds. Keep it above `ShutdownTimeout` (15 s), so the manager does not stop waiting while the server requeues jobs.
 
 A service has no console. Send logs to a file, or to the Windows event log with `golang.org/x/sys/windows/svc/eventlog`. Pass your logger to the server in `server.Options.Logger`.
 
@@ -157,7 +157,7 @@ sudo systemctl enable --now hangfire-worker
 journalctl -u hangfire-worker -f
 ```
 
-Keep `TimeoutStopSec` above `ShutdownTimeout` plus a margin for the final database writes. If systemd sends SIGKILL first, the running jobs are not requeued. They run again after `InvisibilityTimeout` (5 min) instead.
+Keep `TimeoutStopSec` above `ShutdownTimeout` plus a margin for the final database writes. If systemd sends SIGKILL first, the server does not requeue the running jobs. Instead, the jobs run again after `InvisibilityTimeout` (5 min).
 
 ## Differences from .NET Hangfire
 

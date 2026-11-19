@@ -1,6 +1,6 @@
 # Processing jobs in a web application
 
-You can run a Hangfire server inside a Go HTTP service, so the service creates jobs and runs them with no separate worker process. This page shows how to start the server with the service and stop it cleanly when the service gets SIGINT or SIGTERM.
+You can run a Hangfire server inside a Go HTTP service, so the service creates jobs and runs them with no separate worker process. This page shows how to start the server with the service and stop it cleanly when the service receives SIGINT or SIGTERM.
 
 ## Embed the server in a `net/http` service
 
@@ -101,22 +101,22 @@ Two things limit how long the job server takes to stop:
 - `Options.ShutdownTimeout`, 15 s by default. After it, the server requeues jobs whose handlers still run.
 - The `ctx` you pass to `Shutdown`. If it ends first, the server stops waiting and requeues the running jobs at that moment.
 
-The program above gives the HTTP listener its own 10-second budget and passes `context.Background()` to `srv.Shutdown`, so the job server always gets its full `ShutdownTimeout`. If you pass one shared deadline to both calls, a slow HTTP shutdown takes time away from the running jobs.
+The program above gives the HTTP listener its own 10-second budget and passes `context.Background()` to `srv.Shutdown`, so the job server always gets its full `ShutdownTimeout`. If you pass one shared deadline to both calls, a slow HTTP shutdown reduces the time for the running jobs.
 
-After the jobs are requeued, `Shutdown` can still spend up to 30 s on database writes. Give your platform's stop timeout enough room for the HTTP shutdown, `ShutdownTimeout`, and those writes. On Kubernetes this is `terminationGracePeriodSeconds`, which is 30 s by default.
+After the server requeues the jobs, `Shutdown` can still spend up to 30 s on database writes. Give your platform's stop timeout enough room for the HTTP shutdown, `ShutdownTimeout`, and those writes. On Kubernetes this is `terminationGracePeriodSeconds`, which is 30 s by default.
 
 ## Handle exits that skip shutdown
 
-If the process exits without `Shutdown`, for example through `log.Fatal` in a goroutine or a `SIGKILL`, the server row and the running jobs stay behind. The jobs run again on another worker after `InvisibilityTimeout` (5 min). The watchdog of another server removes the server row after `ServerTimeout` (5 min). See [Processing background jobs](processing-background-jobs.md#crashes-and-at-least-once-delivery).
+If the process exits without `Shutdown`, for example through `log.Fatal` in a goroutine or a `SIGKILL`, the server row and the running jobs remain. The jobs run again on another worker after `InvisibilityTimeout` (5 min). The watchdog of another server deletes the server row after `ServerTimeout` (5 min). See [Processing background jobs](processing-background-jobs.md#crashes-and-at-least-once-delivery).
 
 ## Run without the server
 
-To keep the job server out of a web process, remove `server.New`, `Start`, and `Shutdown`. The `sqlserver.Client` still creates jobs, and a separate process runs them. See [Placing processing into another process](placing-processing-into-another-process.md).
+To exclude the job server from a web process, do not call `server.New`, `Start`, or `Shutdown`. The `sqlserver.Client` still creates jobs, and a separate process runs them. See [Placing processing into another process](placing-processing-into-another-process.md).
 
 ## Differences from .NET Hangfire
 
 - .NET ties the server to the host with `UseHangfireServer` or `AddHangfireServer`, and the host disposes it. Go has no host, so you call `Start` and `Shutdown` yourself.
-- .NET needs `Microsoft.Owin.Host.SystemWeb` for graceful shutdown under IIS. A Go service gets its stop request as a signal, and `signal.NotifyContext` turns that signal into a cancelled context.
+- .NET needs `Microsoft.Owin.Host.SystemWeb` for graceful shutdown under IIS. A Go service gets its stop request as a signal, and `signal.NotifyContext` converts that signal to a cancelled context.
 
 ## Related pages
 

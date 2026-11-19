@@ -1,6 +1,6 @@
 # Writing unit tests
 
-Code that creates jobs can be tested without a database when it takes a `hangfire.Client` interface instead of a concrete client. In tests you pass `hangfiretest.FakeClient`, which records each call in memory and hands out job ids. This page shows how to test a producer, a recurring job registration, and a handler.
+You can test code that creates jobs without a database when the code takes a `hangfire.Client` interface instead of a concrete client. In tests you pass `hangfiretest.FakeClient`, which records each call in memory and returns job ids. This page shows how to test a producer, a recurring job registration, and a handler.
 
 ## Depend on the interface
 
@@ -77,7 +77,7 @@ func TestRegisterEnqueuesWelcomeEmail(t *testing.T) {
 
 Check both `Type` and `Method`. A method name alone matches any type that has a method of that name.
 
-The fake validates queue names as the real client does, so a bad queue fails the test with `hangfire.ErrInvalidQueue`. It does not check that `Args` and `ParameterTypes` have the same length, and it never touches a database. `Delete`, `Requeue`, `Reschedule`, and `ChangeState` return `true` for ids the fake created and `false` for any other. `Calls` returns every call, including those.
+The fake checks queue names as the real client does, so a bad queue fails the test with `hangfire.ErrInvalidQueue`. It does not check that `Args` and `ParameterTypes` have the same length, and it never touches a database. `Delete`, `Requeue`, `Reschedule`, and `ChangeState` return `true` for ids the fake created and `false` for any other. `Calls` returns every call, including those.
 
 ## Fake the recurring job manager
 

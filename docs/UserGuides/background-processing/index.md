@@ -8,10 +8,10 @@ A Go server reads the same SQL Server tables as a .NET `BackgroundJobServer`. It
 
 - [Processing background jobs](processing-background-jobs.md) explains what a `server.Server` runs, how it starts and stops, and what happens when a process crashes.
 - [Processing jobs in a web application](processing-jobs-in-web-app.md) embeds a server in a `net/http` service.
-- [Processing jobs in a console application](processing-jobs-in-console-app.md) runs a server with `Run(ctx)` until the process gets a signal.
+- [Processing jobs in a console application](processing-jobs-in-console-app.md) runs a server with `Run(ctx)` until the process receives a signal.
 - [Processing jobs in a Windows service](processing-jobs-in-windows-service.md) runs a server under the Windows service manager or under systemd.
 - [Dealing with exceptions](dealing-with-exceptions.md) covers errors, panics, retry policies, and the `Failed` state.
-- [Tracking the progress](tracking-progress.md) stores progress in job parameters and reads it back.
+- [Tracking the progress](tracking-progress.md) stores progress in job parameters and reads it.
 - [Configuring the degree of parallelism](configuring-degree-of-parallelism.md) sets the number of workers.
 - [Placing processing into another process](placing-processing-into-another-process.md) splits producers from servers, and Go servers from .NET servers.
 - [Running multiple server instances](running-multiple-server-instances.md) covers server ids, heartbeats, the watchdog, and the locks shared with .NET.

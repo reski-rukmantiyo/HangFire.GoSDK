@@ -1,10 +1,10 @@
 # Passing arguments
 
-Jobs get their input from arguments. The SDK serializes each argument to JSON and stores the list with the job, because the job runs in another process, maybe in another language. This page shows how to write arguments that .NET servers can read, how Go handlers receive them, and what to keep out of them.
+Jobs get their input from arguments. The SDK serializes each argument to JSON and stores the list with the job, because the job runs in another process, maybe in another language. This page shows how to write arguments that .NET servers can read, how Go handlers receive them, and what not to put in them.
 
 ## Match arguments to parameter types
 
-`Args` holds one value per entry in `ParameterTypes`, in the same order. A count mismatch is an error before anything is written:
+`Args` holds one value per entry in `ParameterTypes`, in the same order. If the counts do not match, the client returns an error before it writes anything:
 
 ```go
 inv := hangfire.Invocation{
@@ -36,11 +36,11 @@ Use these Go types for common .NET parameter types:
 | `System.Threading.CancellationToken` | `nil` |
 | any class or struct | a Go struct |
 
-A `nil` argument is stored as JSON `null`.
+The SDK stores a `nil` argument as JSON `null`.
 
 ## Pass structs
 
-A Go struct becomes a JSON object. Name the fields as the .NET properties are named, with `json` tags or with exported Go field names. The SDK never changes their case:
+A Go struct becomes a JSON object. Give the fields the same names as the .NET properties, with `json` tags or with exported Go field names. The SDK never changes their case:
 
 ```go
 type Order struct {
@@ -66,7 +66,7 @@ arg := hangfire.WithDotNetType(Order{ID: 7}, "MyApp.Contracts.Order, MyApp.Contr
 args := []any{arg}
 ```
 
-The value must encode as a JSON object. Without that fleet setting, leave the wrapper out.
+The value must encode as a JSON object. Without that fleet setting, do not use the wrapper.
 
 ## Receive arguments in a Go handler
 
@@ -80,7 +80,7 @@ srv.Handle("MyApp.Jobs.IOrderJobs, MyApp.Contracts", "Ship",
 	}))
 ```
 
-`CancellationToken`, `IJobCancellationToken`, and `PerformContext` parameters are dropped before decoding, so the handler does not declare them. A handler takes at most four job arguments. For a method with more parameters, change the contract to take one class instead.
+The Go server removes `CancellationToken`, `IJobCancellationToken`, and `PerformContext` parameters before it decodes the arguments, so the handler does not declare them. A handler takes at most four job arguments. For a method with more parameters, change the contract to take one class instead.
 
 If an argument does not decode, the job fails with the exception type `Hangfire.Go.ArgumentDecodeException`, and it is not retried, because a retry gets the same bytes.
 
@@ -120,13 +120,13 @@ A parameter name has at most 40 characters.
 
 Arguments live in the `Job` table until the job expires. Pass the id of a row in your own database, not the row itself. The SDK logs a warning when a job's arguments exceed 64 KiB, and rejects a job above `sqlserver.Options.MaxArgumentBytes`, 1 MiB by default, with `hangfire.ErrPayloadTooLarge`.
 
-A job can run minutes or weeks after it was created. By then the row an id points to may have changed or gone. Read it when the job runs and decide what to do if it is missing.
+A job can run minutes or weeks after the client creates it. By then the row an id points to may have changed or gone. Read it when the job runs and decide what to do if it is missing.
 
 ## Differences from .NET Hangfire
 
 - .NET captures arguments from the lambda. In Go you list them in `Args`, and nothing checks them against `ParameterTypes` except the count.
-- Go has no `ref` or `out` parameters, so that .NET limit does not come up.
-- A .NET `DateTime` with an unspecified kind is written without a time zone suffix. Go's `time.Time` cannot decode that, so the Go handler fails with `ArgumentDecodeException`. If .NET code creates jobs for a Go handler, have it pass UTC values or `DateTimeOffset`, or take the parameter as a `string` in Go.
+- Go has no `ref` or `out` parameters, so that .NET limit does not apply.
+- .NET writes a `DateTime` with an unspecified kind without a time zone suffix. Go's `time.Time` cannot decode that, so the Go handler fails with `ArgumentDecodeException`. If .NET code creates jobs for a Go handler, have it pass UTC values or `DateTimeOffset`, or take the parameter as a `string` in Go.
 
 ## Related pages
 

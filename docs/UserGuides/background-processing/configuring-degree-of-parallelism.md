@@ -53,9 +53,9 @@ reports.Handle("MyApp.Jobs.ReportJob, MyApp", "Build", server.Handler1(buildRepo
 general.Handle("MyApp.Jobs.EmailJob, MyApp", "Send", server.Handler1(sendEmail))
 ```
 
-Start and shut down both servers. At most two report jobs run at once in this process, and they never take workers from the other queues. Each server needs its own handlers, because handlers belong to one server.
+Call `Start` and `Shutdown` on both servers. At most two report jobs run at once in this process, and they never take workers from the other queues. Each server needs its own handlers, because handlers belong to one server.
 
-Both servers run the default background processes. That is safe, because the processes take distributed locks. To avoid duplicate work, you can turn the processes off on one of them with `DisableDelayedScheduler`, `DisableCancellationWatcher`, and `DisableServerWatchdog`. Keep `DisableCancellationWatcher` false on any server whose handlers must react when a running job is deleted.
+Both servers run the default background processes. That is safe, because the processes take distributed locks. To avoid duplicate work, you can disable the processes on one of them with `DisableDelayedScheduler`, `DisableCancellationWatcher`, and `DisableServerWatchdog`. Keep `DisableCancellationWatcher` false on any server whose handlers must react when someone deletes a running job.
 
 To cap one handler without a second server, see `WithMaxConcurrency` in [Concurrency and rate limiting](throttling.md).
 

@@ -1,6 +1,6 @@
 # Tracking the progress
 
-Hangfire has no built-in progress API. You report progress from the job and read it from wherever your users look. This page shows how a Go handler stores progress in a job parameter, and how a web endpoint reads it back by polling.
+Hangfire has no built-in progress API. You report progress from the job and read it from wherever your users look. This page shows how a Go handler stores progress in a job parameter, and how a web endpoint reads it by polling.
 
 ## Read the job context
 
@@ -11,7 +11,7 @@ Inside a handler, `server.FromContext(ctx)` returns the `*server.JobContext` of 
 | `JobID` | the Hangfire job id |
 | `ServerID` | the id of the server running the job |
 | `WorkerID` | the id of the worker running the job |
-| `Queue` | the queue the job was fetched from |
+| `Queue` | the queue that the worker fetched the job from |
 | `RetryCount` | retries done before this run. 0 on the first run |
 | `CreatedAt` | when the job was created |
 

@@ -1,6 +1,6 @@
 # Placing processing into another process
 
-You can create jobs in one process and run them in another. Do this when jobs use resources the main service needs, or when long jobs keep getting cut short by deploys of the main service. In a mixed fleet the same idea decides which jobs Go runs and which jobs .NET runs. This page shows both splits.
+You can create jobs in one process and run them in another. Do this when jobs use resources the main service needs, or when deploys of the main service repeatedly interrupt long jobs. In a mixed fleet the same idea decides which jobs Go runs and which jobs .NET runs. This page shows both splits.
 
 ## Create jobs without running them
 
@@ -27,7 +27,7 @@ Run the jobs in a worker process. See [Processing jobs in a console application]
 In .NET, the client and the server share one code base, so both know the job's class. In Go, the producer and the handler agree on two strings:
 
 - The producer writes `Invocation.Type` and `Invocation.Method`.
-- The server looks up a handler with `Handle(typeName, method, ...)`, by exact string match.
+- The server finds the handler that `Handle(typeName, method, ...)` registered, by exact string match.
 
 If the strings differ by one character, the server finds no handler and the job fails with `Hangfire.Go.HandlerNotFoundException`. Define the names once, in a package that both sides import:
 
@@ -50,7 +50,7 @@ A Go handler cannot run a .NET method, and a .NET server cannot run a Go handler
 - A Go server fails a .NET job with `Hangfire.Go.HandlerNotFoundException`.
 - A .NET server fails a Go job because it cannot load the type or the method.
 
-Each queue must therefore be served only by Go servers or only by .NET servers. Give Go jobs their own queues, such as `go-default` and `go-reports`, and list only those queues in the Go servers' `Options.Queues`. Keep them out of every .NET server's `Queues`.
+Therefore, do not let Go servers and .NET servers serve the same queue. Give Go jobs their own queues, such as `go-default` and `go-reports`. List only those queues in the Go servers' `Options.Queues`. Do not list them in any .NET server's `Queues`.
 
 ```go
 srv, err := server.New(storage, server.Options{

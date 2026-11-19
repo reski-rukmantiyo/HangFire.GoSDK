@@ -31,7 +31,7 @@ The SDK parses cron expressions with the rules of Cronos, the library .NET Hangf
 - Five fields are minute, hour, day of month, month, and day of week.
 - Six fields add seconds in front.
 - Macros are `@every_second`, `@every_minute`, `@hourly`, `@daily`, `@midnight`, `@weekly`, `@monthly`, `@yearly`, and `@annually`.
-- When both day of month and day of week are set, a day must match both. `0 9 13 * FRI` fires only on Friday the 13th. Standard Unix cron would fire on every 13th and every Friday.
+- When the expression sets both day of month and day of week, a day must match both. `0 9 13 * FRI` fires only on Friday the 13th. Standard Unix cron would fire on every 13th and every Friday.
 
 The table translates the .NET `Cron` helpers:
 
@@ -64,7 +64,7 @@ for range 3 {
 
 ## Pick the time zone
 
-`RecurringOptions.TimeZone` is stored as you write it, and every server that schedules the job resolves it. An empty value means `UTC`. The Go scheduler accepts IANA ids such as `Europe/Berlin` and the common Windows ids such as `W. Europe Standard Time`. Use an id that your .NET servers can also resolve on their operating system.
+The SDK stores `RecurringOptions.TimeZone` as you write it, and every server that schedules the job resolves it. An empty value means `UTC`. The Go scheduler accepts IANA ids such as `Europe/Berlin` and the common Windows ids such as `W. Europe Standard Time`. Use an id that your .NET servers can also resolve on their operating system.
 
 ## Choose what happens after downtime
 
@@ -94,7 +94,7 @@ The Go and .NET schedulers take the same distributed lock, so running both is sa
 
 ## Remove a recurring job
 
-`RemoveIfExists` deletes the template and its schedule. It returns no error when the id does not exist. Jobs already created from the template are not touched.
+`RemoveIfExists` removes the template and its schedule. It returns no error when the id does not exist. It does not change jobs already created from the template.
 
 ```go
 if err := recurring.RemoveIfExists(ctx, "nightly-report"); err != nil {
@@ -121,7 +121,7 @@ if id == "" {
 ## Differences from .NET Hangfire
 
 - `RecurringJob.AddOrUpdate("id", () => ..., Cron.Daily)` becomes `NewRecurringManager(storage).AddOrUpdate(ctx, "id", inv, "0 0 * * *", opts)`. There are no `Cron` helper methods.
-- Go servers do not run the recurring scheduler by default, because .NET servers usually do. Turn it on with `EnableRecurringScheduler` when no .NET server shares the database.
+- Go servers do not run the recurring scheduler by default, because .NET servers usually do. Enable it with `EnableRecurringScheduler` when no .NET server shares the database.
 - The time zone is a string id, not a `TimeZoneInfo`.
 
 ## Related pages

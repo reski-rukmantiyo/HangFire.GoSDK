@@ -17,11 +17,11 @@ func run(ctx context.Context, storage *sqlserver.Storage, users Users, mailer Ma
 }
 ```
 
-If your program already uses a dependency injection tool such as Wire or Fx, let it produce the `EmailJobs` value and call `register` with it. The server does not care where the value came from. Register every handler before `Start` or `Run`. `Handle` panics after the server has started.
+If your program already uses a dependency injection tool such as Wire or Fx, let it produce the `EmailJobs` value and call `register` with it. The server does not care where the value came from. Register every handler before `Start` or `Run`. `Handle` panics after the server starts.
 
 ## Create per-job resources inside the handler
 
-A .NET container can give each job its own scope, so scoped services such as a `DbContext` live for one run. In Go, open the resource at the start of the handler and release it with `defer`. A small wrapper keeps that out of each handler:
+A .NET container can give each job its own scope, so scoped services such as a `DbContext` live for one run. In Go, open the resource at the start of the handler and release it with `defer`. A small wrapper does that work for each handler:
 
 ```go
 func inTx[A any](db *sql.DB, f func(context.Context, *sql.Tx, A) error) func(context.Context, A) error {
@@ -55,12 +55,12 @@ The SDK requirements describe an optional `Scope` hook that the server would cal
 
 ## The request is gone when the job runs
 
-A job runs in a server process long after the HTTP request that created it has ended. Do not capture request-scoped values, such as the request's `context.Context`, the logged-in user, or a per-request database transaction, in a handler or its dependencies. The handler's `ctx` comes from the server, not from any request. If the job needs the user, pass the user id as an argument or a job parameter.
+A job runs in a server process long after the HTTP request that created it ends. Do not capture request-scoped values, such as the request's `context.Context`, the logged-in user, or a per-request database transaction, in a handler or its dependencies. The handler's `ctx` comes from the server, not from any request. If the job needs the user, pass the user id as an argument or a job parameter.
 
 ## Differences from .NET Hangfire
 
 - There is no `JobActivator`, `UseActivator`, or container integration package. Handlers are plain Go functions that you register by hand.
-- A .NET container resolves a new job object per run. A Go handler and the values it captured are shared by all runs and workers, so they must be safe for concurrent use.
+- A .NET container resolves a new job object per run. All runs and workers share a Go handler and the values it captured, so the handler and the values must be safe for concurrent use.
 - There is no per-job scope hook. See [There is no per-job scope hook](#there-is-no-per-job-scope-hook).
 
 ## Related pages

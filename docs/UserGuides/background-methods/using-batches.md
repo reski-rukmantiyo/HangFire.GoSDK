@@ -1,10 +1,14 @@
 # Using batches
 
-Batches are a Hangfire.Pro feature. They group jobs so that the group is created atomically and a continuation can wait for the whole group. The Go SDK does not support batches. It cannot create them, and a Go server does not run the filters that track them. This page shows what the SDK offers instead: continuations for chains of jobs, a pattern for waiting on several jobs, and atomic creation of several jobs through the storage API.
+Batches are a Hangfire.Pro feature. They group jobs so that Hangfire.Pro creates the group atomically and a continuation can wait for the whole group. The Go SDK does not support batches. It cannot create them, and a Go server does not run the filters that track them. This page shows what the SDK offers instead:
+
+- Continuations for chains of jobs.
+- A pattern to wait for several jobs.
+- Atomic creation of several jobs through the storage API.
 
 ## Why the SDK has no batches
 
-Hangfire.Pro stores batches in its own format, with its own job filters and Dashboard pages. That format is proprietary and not part of the open Hangfire.SqlServer schema that the SDK writes. A Go producer cannot create a batch, and a Go server ignores batch membership if a .NET producer adds one of its jobs to a batch.
+Hangfire.Pro stores batches in its own format, with its own job filters and Dashboard pages. That format is proprietary and not part of the open Hangfire.SqlServer schema that the SDK writes. A Go producer cannot create a batch. If a .NET producer adds one of its jobs to a batch, a Go server ignores the batch membership.
 
 ## Chain jobs with continuations
 
@@ -40,7 +44,7 @@ The `cont` argument decides when the child runs:
 | `hangfire.OnlyOnDeletedState` | `Deleted` |
 | `hangfire.OnAnyFinishedState` | `Succeeded` or `Deleted` |
 
-If the parent finishes in a state the option does not accept, the child moves to `Deleted` with the reason `Continuation condition was not met`. A `Failed` parent is not finished, because it can still be retried, so its continuations keep waiting.
+If the parent finishes in a state the option does not accept, the child moves to `Deleted` with the reason `Continuation condition was not met`. A `Failed` parent is not finished, because a server can still retry it, so its continuations keep waiting.
 
 The `next` argument is the state the child moves to. `nil` means `Enqueued` on the child's queue. Pass a `hangfire.Scheduled` value to delay the child after the parent finishes. If the parent has already finished when you call `ContinueJobWith`, the child moves to its next state at once. `ContinueJobWith` returns an error wrapping `hangfire.ErrParentNotFound` when the parent id does not exist.
 
@@ -76,7 +80,13 @@ Jobs can run more than once, so a retried part must not decrement the counter tw
 
 ## Create several jobs in one transaction
 
-`hangfire.Client` creates each job in its own transaction. If the third of five calls fails, the first two jobs already exist. To create a group of jobs that all exist or none do, use the storage API: open a `sqlserver.Session`, start a transaction with `InTx`, and create each job with `Session.CreateJob`. Calls inside `InTx` join its transaction.
+`hangfire.Client` creates each job in its own transaction. If the third of five calls fails, the first two jobs already exist. To create a group of jobs that all exist or none do, use the storage API:
+
+1. Open a `sqlserver.Session`.
+2. Start a transaction with `InTx`.
+3. Create each job with `Session.CreateJob`.
+
+Calls inside `InTx` join its transaction.
 
 ```go
 func enqueueAll(ctx context.Context, storage *sqlserver.Storage, invs []hangfire.Invocation) ([]hangfire.JobID, error) {

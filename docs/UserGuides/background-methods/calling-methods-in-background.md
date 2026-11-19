@@ -1,6 +1,6 @@
 # Calling methods in background
 
-A fire-and-forget job runs once, as soon as a server picks it up. This page shows how to enqueue one from Go, what the call writes to SQL Server, and how to decide whether a .NET server or a Go server runs it.
+A fire-and-forget job runs once, as soon as a server fetches it. This page shows how to enqueue one from Go and what the call writes to SQL Server. It also shows how to decide whether a .NET server or a Go server runs the job.
 
 ## Connect to the Hangfire database
 
@@ -52,7 +52,7 @@ func main() {
 
 ## What Enqueue writes
 
-`Enqueue` returns as soon as the job is stored. It does not wait for the job to run. In one transaction it does the following:
+`Enqueue` returns as soon as it stores the job. It does not wait for the job to run. In one transaction it does the following:
 
 1. Inserts a `Job` row with the invocation in `InvocationData` and the arguments in `Arguments`.
 2. Inserts any job parameters.

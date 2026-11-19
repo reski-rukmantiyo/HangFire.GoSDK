@@ -1,6 +1,6 @@
 # Configuring job queues
 
-Queues let you split jobs between servers and keep slow jobs from delaying urgent ones. A producer puts each job in a queue, and each server lists the queues it fetches from. This page shows both sides, the naming rule, and the order in which SQL Server fetches queues.
+Queues let you split jobs between servers and prevent slow jobs from delaying urgent jobs. A producer puts each job in a queue, and each server lists the queues it fetches from. This page shows both sides, the naming rule, and the order in which SQL Server fetches queues.
 
 ## Put a job in a queue
 
@@ -22,7 +22,15 @@ if _, err := client.Schedule(ctx, inv, time.Hour, hangfire.WithQueue("critical")
 }
 ```
 
-The queue is stored in the job's payload. It applies when the job is enqueued now, when a scheduled job comes due, when a continuation starts, when a retry runs, and when someone requeues the job from the Dashboard. Recurring jobs take their queue from `hangfire.RecurringOptions.Queue`.
+The client stores the queue in the job's payload. The queue applies in these cases:
+
+- The client enqueues the job at once.
+- A scheduled job reaches its scheduled time.
+- A continuation starts.
+- A retry runs.
+- Someone requeues the job from the Dashboard.
+
+Recurring jobs take their queue from `hangfire.RecurringOptions.Queue`.
 
 ## Choose the queues a server fetches
 
@@ -61,7 +69,7 @@ The order is a preference, not a guarantee. A worker takes the first visible row
 ## Differences from .NET Hangfire
 
 - .NET picks a queue with the `[Queue]` attribute on the method. Go producers pass `hangfire.WithQueue` on each call. The `[Queue]` attribute has no effect on Go handlers.
-- In a fleet with Go and .NET servers, each queue must be served only by Go servers or only by .NET servers. See [Placing processing into another process](placing-processing-into-another-process.md#split-queues-between-go-and-net).
+- In a fleet with Go and .NET servers, do not let Go servers and .NET servers serve the same queue. See [Placing processing into another process](placing-processing-into-another-process.md#split-queues-between-go-and-net).
 
 ## Related pages
 

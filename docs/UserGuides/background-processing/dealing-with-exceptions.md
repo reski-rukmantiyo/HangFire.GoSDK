@@ -1,6 +1,6 @@
 # Dealing with exceptions
 
-A Go handler fails by returning an error or by panicking. The server never crashes on a failed job. It records the failure in the `Failed` state, as .NET does, and retries the job under a retry policy. This page shows how failures are recorded, how to change the retry policy, and which failures are never retried.
+A Go handler fails by returning an error or by panicking. The server never crashes on a failed job. It records the failure in the `Failed` state, as .NET does, and retries the job under a retry policy. This page shows how the server records failures, how to change the retry policy, and which failures are never retried.
 
 ## Return an error
 
@@ -37,19 +37,19 @@ A job that fails with `charge` shows `ExceptionType` `MyApp.Billing.CardDeclined
 
 The server recovers a panic in a handler and treats it as a failure. `ExceptionType` is `Go:` and the type of the panic value, for example `Go:string` for `panic("boom")`. If the panic value is an error, the server reads its type as it does for a returned error. `ExceptionDetails` holds `panic:`, the message, and the goroutine's stack trace.
 
-A panic in a goroutine that the handler starts is not recovered. It crashes the process, as any unrecovered panic in Go does.
+The server does not recover a panic in a goroutine that the handler starts. That panic crashes the process, as any unrecovered panic in Go does.
 
 ## Automatic retries
 
-By default a failed job gets 10 retries. This matches .NET's `AutomaticRetryAttribute`. For retry `n`, the server does these steps:
+By default the server retries a failed job 10 times. This matches .NET's `AutomaticRetryAttribute`. For retry `n`, the server does these steps:
 
 1. Sets the job parameter `RetryCount` to `n`.
-2. Moves the job to `Scheduled`, with the reason `Retry attempt n of 10: <message>`. Messages longer than 50 characters are cut to 49 characters and `…`.
+2. Moves the job to `Scheduled`, with the reason `Retry attempt n of 10: <message>`. The server cuts a message longer than 50 characters to 49 characters and `…`.
 3. Waits `round((n-1)^4 + 15 + rand(0..29)*n)` seconds before the job is enqueued again. The first retry runs after 15 to 44 seconds. The tenth runs after 1.8 to 1.9 hours.
 
 The delayed job scheduler moves the job back to its queue when the delay ends. Some server in the fleet must run that scheduler. See [Processing background jobs](processing-background-jobs.md#what-a-server-runs).
 
-When the retries run out, the job stays in `Failed`. Failed jobs never expire. Requeue one from the Dashboard, or with `Client.Requeue`:
+When no retries remain, the job stays in `Failed`. Failed jobs never expire. Requeue one from the Dashboard, or with `Client.Requeue`:
 
 ```go
 ok, err := sqlserver.NewClient(storage).Requeue(ctx, hangfire.JobID("42"))
@@ -89,14 +89,14 @@ srv.Handle("MyApp.Jobs.WebhookJob, MyApp", "Deliver", server.Handler1(deliver),
 	}))
 ```
 
-To turn retries off for one handler, pass a policy with no attempts:
+To disable retries for one handler, pass a policy with no attempts:
 
 ```go
 srv.Handle("MyApp.Jobs.ReportJob, MyApp", "Build", server.Handler1(buildReport),
 	server.WithRetry(server.RetryPolicy{Attempts: 0}))
 ```
 
-A nil `Options.Retry` means the default policy, 10 attempts. A zero `RetryPolicy{}` means no retries. Take care not to mix the two up.
+A nil `Options.Retry` means the default policy, 10 attempts. A zero `RetryPolicy{}` means no retries. Do not confuse the two.
 
 Inside a handler, `server.FromContext(ctx).RetryCount` tells you how many retries came before this run. It is 0 on the first run.
 
@@ -106,24 +106,29 @@ Some jobs fail before their handler runs.
 
 **Arguments that do not decode.** If the job's arguments do not decode into the handler's parameter types, or their number is wrong, the job fails at once with no retry. A retry cannot fix the payload. `ExceptionType` is `Hangfire.Go.ArgumentDecodeException`, and the message names the argument, for example `argument 1: json: cannot unmarshal string into Go value of type int`. In Go code this is a `*server.ArgumentDecodeError`.
 
-**No handler for the job.** If the server has no handler for the job's `Type` and `Method`, or cannot read the job's payload, the job fails with the reason that .NET writes in the same case: `Can not change the state to 'Processing': target method was not found.` `ExceptionType` is `Hangfire.Go.HandlerNotFoundException`. The server's global retry policy still applies, so by default the job is retried 10 times before it stays in `Failed`. Each retry goes back to the same queue, so it fails the same way unless a server with the handler serves that queue. See [Placing processing into another process](placing-processing-into-another-process.md).
+**No handler for the job.** This failure occurs when one of these conditions is true:
+
+- The server has no handler for the job's `Type` and `Method`.
+- The server cannot read the job's payload.
+
+The job then fails with the reason that .NET writes in the same case: `Can not change the state to 'Processing': target method was not found.` `ExceptionType` is `Hangfire.Go.HandlerNotFoundException`. The server's global retry policy still applies. By default, the server therefore retries the job 10 times before the job stays in `Failed`. Each retry goes back to the same queue, so it fails the same way unless a server with the handler serves that queue. See [Placing processing into another process](placing-processing-into-another-process.md).
 
 ## Cancellation is not a failure
 
 Two events cancel a handler's context:
 
-- `Shutdown`. If the handler then returns `ctx.Err()`, or an error that wraps it, the server requeues the job instead of failing it. Return any other error and the job fails.
-- A state change from outside. If someone deletes or requeues the job while it runs, the cancellation watcher sees it within `CancellationCheckInterval` (5 s) and cancels the context. The server discards whatever the handler returns, because the job has already moved on.
+- `Shutdown`. If the handler then returns `ctx.Err()`, or an error that wraps it, the server requeues the job instead of failing it. If the handler returns any other error, the job fails.
+- A state change from outside. If someone deletes or requeues the job while it runs, the cancellation watcher sees it within `CancellationCheckInterval` (5 s) and cancels the context. The server discards whatever the handler returns, because the job is already in a different state.
 
 ## Errors in the server itself
 
-The server logs its own errors through `Options.Logger`, a `*slog.Logger` that defaults to `slog.Default()`. A failed fetch, a failed keep-alive, or a failed background process pass is logged and tried again. None of them stops the server. Keep error-level logs visible in production.
+The server logs its own errors through `Options.Logger`, a `*slog.Logger` that defaults to `slog.Default()`. The server logs a failed fetch, a failed keep-alive, or a failed background process pass, and then tries it again. None of them stops the server. Keep error-level logs visible in production.
 
 ## Differences from .NET Hangfire
 
 - .NET sets the retry policy with `[AutomaticRetry]` on the method or with a global filter. In Go, set `Options.Retry` for the server and `WithRetry` for one handler. .NET filter attributes on the C# interface have no effect on Go handlers.
 - `ExceptionType` holds a Go type with a `Go:` prefix, not a .NET exception type, unless the error sets its own type.
-- .NET has no special case for arguments that do not deserialize. The Go server fails such jobs without retry.
+- .NET has no special case for arguments that do not decode. The Go server fails such jobs without retry.
 
 ## Related pages
 

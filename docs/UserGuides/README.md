@@ -4,7 +4,7 @@ These guides show how to create, schedule, and process Hangfire background jobs 
 
 ## How the SDK fits into Hangfire
 
-Hangfire has no network API. Clients write jobs as rows into a shared SQL Server database, and servers poll that database for work. The Go SDK reads and writes the same rows as .NET Hangfire 1.8, so Go and .NET clients, servers, and the Hangfire Dashboard can share one database.
+Hangfire has no network API. Clients write jobs as rows into a shared SQL Server database, and servers poll that database for work. The Go SDK reads and writes the same rows as .NET Hangfire 1.8. Thus Go and .NET clients, servers, and the Hangfire Dashboard can share one database.
 
 | Package | Role |
 |---|---|
@@ -13,7 +13,7 @@ Hangfire has no network API. Clients write jobs as rows into a shared SQL Server
 | `server` | Go server that runs Go handlers for Hangfire jobs |
 | `hangfiretest` | In-memory fake client for unit tests |
 
-A job names its target as a .NET type and method, such as `MyApp.Jobs.IEmailJobs, MyApp` and `Send`. Either a .NET server runs that method, or a Go server runs the handler registered under the same names.
+A job names its target as a .NET type and method, such as `MyApp.Jobs.IEmailJobs, MyApp` and `Send`. Either a .NET server runs that method, or a Go server runs the handler that you registered under the same names.
 
 ## Background Methods
 

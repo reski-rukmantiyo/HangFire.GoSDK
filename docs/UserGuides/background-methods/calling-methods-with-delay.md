@@ -73,7 +73,7 @@ if _, err := client.Requeue(ctx, id); err != nil {
 ## Differences from .NET Hangfire
 
 - `BackgroundJob.Schedule(() => ..., TimeSpan.FromDays(1))` becomes `client.Schedule(ctx, inv, 24*time.Hour)`. The `DateTimeOffset` overload becomes `ScheduleAt`.
-- A Go process has no application pool idle timeout. The process that runs the scheduler only has to stay up, as any long-running Go service does.
+- A Go process has no application pool idle timeout. The process that runs the scheduler only has to continue to run, as any long-running Go service does.
 
 ## Related pages
 

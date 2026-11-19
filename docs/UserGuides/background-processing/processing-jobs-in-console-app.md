@@ -1,6 +1,6 @@
 # Processing jobs in a console application
 
-A console program can be a dedicated Hangfire worker. `Run(ctx)` starts the server, blocks until `ctx` is done, and then shuts the server down gracefully. This page shows a complete worker program.
+A console program can be a dedicated Hangfire worker. `Run(ctx)` starts the server, blocks until `ctx` is done, and then stops the server gracefully. This page shows a complete worker program.
 
 ## Add the packages
 
@@ -75,9 +75,9 @@ The worker logs `hangfire: server started` with its worker count and queues. The
 
 ## Stop the worker
 
-Press Ctrl+C, or send SIGTERM. `signal.NotifyContext` cancels `ctx`, and `Run` calls `Shutdown`. Running handlers get `StopTimeout` (500 ms) before their contexts are cancelled, and up to `ShutdownTimeout` (15 s) in total. Jobs still running after that are requeued. The worker then logs `hangfire: server stopped`, with `graceful=true` if every handler returned in time.
+Press Ctrl+C, or send SIGTERM. `signal.NotifyContext` cancels `ctx`, and `Run` calls `Shutdown`. Running handlers get `StopTimeout` (500 ms) before the server cancels their contexts, and up to `ShutdownTimeout` (15 s) in total. The server requeues the jobs that still run after that. The worker then logs `hangfire: server stopped`, with `graceful=true` if every handler returned in time.
 
-`Run` returns an error if `Start` fails, for example when the database is unreachable. It also returns the errors of the final requeue and cleanup writes. A nil error means the server stopped and removed its row.
+`Run` returns an error if `Start` fails, for example when the database is unreachable. It also returns the errors of the final requeue and cleanup writes. A nil error means the server stopped and deleted its row.
 
 The [`examples/worker`](../../../examples/worker/main.go) program in this repository is a worker of this shape.
 
