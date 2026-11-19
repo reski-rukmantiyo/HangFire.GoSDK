@@ -164,11 +164,17 @@ func (e *env) waitState(id hangfire.JobID, name string) *sqlserver.JobDetails {
 	e.t.Helper()
 	deadline := time.Now().Add(30 * time.Second)
 	for {
+		// Monitor reads with nolock, like the .NET Dashboard, so it can see a
+		// transaction half applied. Wait on a read-committed read first.
+		jd, err := e.s.JobData(e.ctx, id)
+		if err != nil {
+			e.t.Fatal(err)
+		}
 		d, err := e.m.JobDetails(e.ctx, id)
 		if err != nil {
 			e.t.Fatal(err)
 		}
-		if d != nil && len(d.History) > 0 && d.History[0].StateName == name {
+		if jd != nil && jd.StateName == name && d != nil && len(d.History) > 0 && d.History[0].StateName == name {
 			return d
 		}
 		if time.Now().After(deadline) {
